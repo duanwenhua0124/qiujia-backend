@@ -1,6 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install --legacy-peer-deps"
+buildCommand = "npm ci"
+
+[nixpacks]
+PYTHON_VERSION = "3.11"
 
 [deploy]
 startCommand = "npm start"
