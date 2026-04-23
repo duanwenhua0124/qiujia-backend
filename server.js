@@ -48,20 +48,42 @@ app.use((req, res) => {
   });
 });
 
-// 连接数据库并启动服务器
-const PORT = process.env.PORT || 3000;
+// 数据库连接（延迟到请求时）
+let isConnected = false;
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/task_checkin')
-  .then(() => {
+const connectDB = async () => {
+  if (isConnected) return;
+  
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/task_checkin');
+    isConnected = true;
     console.log('✅ 数据库连接成功');
-    app.listen(PORT, () => {
-      console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
-      console.log(`📚 API文档 http://localhost:${PORT}/api/v1`);
-    });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error('❌ 数据库连接失败:', error);
-    process.exit(1);
-  });
+  }
+};
+
+// 中间件：确保数据库连接
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
+// 本地开发时启动服务器
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/task_checkin')
+    .then(() => {
+      console.log('✅ 数据库连接成功');
+      app.listen(PORT, () => {
+        console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
+        console.log(`📚 API文档 http://localhost:${PORT}/api/v1`);
+      });
+    })
+    .catch((error) => {
+      console.error('❌ 数据库连接失败:', error);
+      process.exit(1);
+    });
+}
 
 module.exports = app;
