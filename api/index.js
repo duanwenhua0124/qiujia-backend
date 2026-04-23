@@ -1,5 +1,10 @@
-// Vercel Serverless 函数入口
 const app = require('../server');
 
-// 导出为 serverless 函数
-module.exports = app;
+// Vercel Serverless Function Handler
+module.exports = async (req, res) => {
+  // 确保数据库连接
+  await app.connectDB?.();
+  
+  // 交给Express处理
+  return app(req, res);
+};
