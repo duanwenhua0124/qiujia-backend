@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../db/models');
 const { generateToken } = require('../middleware/auth');
 const CONFIG = require('../config');
 
@@ -82,9 +82,9 @@ router.post('/login', async (req, res) => {
     verificationCodes.delete(phone);
     
     // 查找或创建用户
-    let user = await User.findOne({ phone });
+    let user = User.findByPhone(phone);
     if (!user) {
-      user = await User.create({
+      user = User.create({
         phone,
         points: CONFIG.POINTS.INITIAL_POINTS,
         total_points: CONFIG.POINTS.INITIAL_POINTS
@@ -92,7 +92,7 @@ router.post('/login', async (req, res) => {
     }
     
     // 生成Token
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
     
     res.json({
       code: 200,
@@ -100,7 +100,7 @@ router.post('/login', async (req, res) => {
       data: {
         token,
         user: {
-          _id: user._id,
+          _id: user.id,
           phone: user.phone,
           nickname: user.nickname,
           avatar: user.avatar,
@@ -128,11 +128,15 @@ router.put('/profile', require('../middleware/auth').auth, async (req, res) => {
     if (nickname) updates.nickname = nickname;
     if (avatar !== undefined) updates.avatar = avatar;
     
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      updates,
-      { new: true }
-    );
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        code: 400,
+        message: '没有需要更新的字段'
+      });
+    }
+    
+    User.updateById(req.userId, updates);
+    const user = User.findById(req.userId);
     
     res.json({
       code: 200,

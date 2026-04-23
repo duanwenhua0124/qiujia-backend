@@ -1,15 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
-const Checkin = require('../models/Checkin');
-const PointTransaction = require('../models/PointTransaction');
-const CustomTask = require('../models/CustomTask');
+const { User, Checkin, PointTransaction, CustomTask } = require('../db/models');
 const { auth, admin } = require('../middleware/auth');
 
 // 获取用户信息
 router.get('/profile', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = User.findById(req.userId);
     
     res.json({
       code: 200,
@@ -36,11 +33,8 @@ router.post('/avatar', auth, async (req, res) => {
       });
     }
     
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      { avatar },
-      { new: true }
-    );
+    User.updateById(req.userId, { avatar });
+    const user = User.findById(req.userId);
     
     res.json({
       code: 200,
@@ -51,7 +45,7 @@ router.post('/avatar', auth, async (req, res) => {
     console.error('更新头像失败:', error);
     res.status(500).json({
       code: 500,
-      message: '更新头像失败'
+      message: '更新失败'
     });
   }
 });

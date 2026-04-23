@@ -1,15 +1,16 @@
 {
   "name": "task-checkin-backend",
-  "version": "1.0.0",
-  "description": "卡通任务打卡APP后端",
+  "version": "2.0.0",
+  "description": "卡通任务打卡APP后端 - SQLite版本",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "init-db": "node db/init.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "mongoose": "^8.0.0",
+    "better-sqlite3": "^9.4.3",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -18,5 +19,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
